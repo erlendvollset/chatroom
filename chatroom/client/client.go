@@ -13,7 +13,7 @@ import "sync"
 import "time"
 
 type Client interface {
-	Start(port string)
+	Start(host string, port string)
 }
 
 type client struct {
@@ -75,15 +75,15 @@ func (c *client) scanAndBroadcast() {
 	}()
 }
 
-func (c *client) Start(port string) {
+func (c *client) Start(host string, port string) {
 	done := make(chan int)
-	conn, err := grpc.Dial(fmt.Sprintf("localhost:%s", port), grpc.WithInsecure())
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", host, port), grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Couldn't connect to service: %v", err)
 	}
 	c.chatroomClient = proto.NewChatroomClient(conn)
 	if err := c.streamMessages(); err != nil {
-		log.Fatalf("Error connecting to the server %v", err)
+		log.Fatalf("Error connecting to the server: %v", err)
 	}
 	c.scanAndBroadcast()
 	go func() {

@@ -13,13 +13,16 @@ func main() {
 
 	serverCommand := flag.NewFlagSet("server", flag.ExitOnError)
 
+	host := "localhost"
+	port := "8080"
+
 	switch strings.ToLower(os.Args[1]) {
 	case "client":
 		clientCommand.Parse(os.Args[2:])
-		client.New(userName).Start("8080")
+		client.New(userName).Start(host, port)
 	case "server":
 		serverCommand.Parse(os.Args[2:])
-		server.New().Start("8080")
+		server.New().Start(host, port)
 	default:
 		fmt.Printf("%q is not valid command.\n", os.Args[1])
 		os.Exit(2)

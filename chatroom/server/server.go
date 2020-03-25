@@ -11,7 +11,7 @@ import "os"
 import "sync"
 
 type Server interface {
-	Start(port string)
+	Start(host string, port string)
 }
 
 type connection struct {
@@ -71,13 +71,14 @@ func (s *server) BroadcastMessage(ctx context.Context, msg *proto.Message) (*pro
 	return &proto.Empty{}, nil
 }
 
-func (s *server) Start(port string) {
+func (s *server) Start(host string, port string) {
 	grpcServer := grpc.NewServer()
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%v", port))
+	address := fmt.Sprintf("%v:%v", host, port)
+	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		log.Fatalf("error creating the server %v", err)
 	}
-	s.grpcLog.Infof("Starting server at port :%s", port)
+	s.grpcLog.Infof("Starting server at address: %s", address)
 	proto.RegisterChatroomServer(grpcServer, s)
 	err = grpcServer.Serve(listener)
 	if err != nil {
