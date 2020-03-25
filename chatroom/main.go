@@ -7,23 +7,41 @@ import "github.com/erlendvollset/chatroom/server"
 import "os"
 import "strings"
 
-var userName *string
-var port *string
-var host *string
-
-func parseClientCommand() {
-	clientCommand := flag.NewFlagSet("client", flag.ExitOnError)
-	userName = clientCommand.String("n", "Anon", "The name of the user")
-	host = clientCommand.String("h", "localhost", "The host for the chatroom server")
-	port = clientCommand.String("p", "8080", "The port of the chatroom server")
-	clientCommand.Parse(os.Args[2:])
+type NetworkConfig struct {
+	Host *string
+	Port *string
 }
 
-func parseServerCommand() {
+type ClientConfig struct {
+	NetworkConfig
+	userName *string
+}
+
+type ServerConfig struct {
+	NetworkConfig
+}
+
+func parseClientCommand() ClientConfig {
+	clientCommand := flag.NewFlagSet("client", flag.ExitOnError)
+	config := ClientConfig{
+		NetworkConfig{
+			clientCommand.String("h", "localhost", "The host for the chatroom server"),
+			clientCommand.String("p", "8080", "The port of the chatroom server")},
+		clientCommand.String("n", "Anon", "The name of the user"),
+	}
+	clientCommand.Parse(os.Args[2:])
+	return config
+}
+
+func parseServerCommand() ServerConfig {
 	serverCommand := flag.NewFlagSet("server", flag.ExitOnError)
-	host = serverCommand.String("h", "localhost", "The host for the chatroom server")
-	port = serverCommand.String("p", "8080", "The port of the chatroom server")
+	config := ServerConfig{
+		NetworkConfig{
+		serverCommand.String("h", "localhost", "The host for the chatroom server"),
+		serverCommand.String("p", "8080", "The port of the chatroom server")},
+	}
 	serverCommand.Parse(os.Args[2:])
+	return config
 }
 
 func main() {
@@ -33,11 +51,11 @@ func main() {
 	}
 	switch strings.ToLower(os.Args[1]) {
 	case "client":
-		parseClientCommand()
-		client.New(userName).Start(*host, *port)
+		config := parseClientCommand()
+		client.New(*config.userName).Start(*config.Host, *config.Port)
 	case "server":
-		parseServerCommand()
-		server.New().Start(*host, *port)
+		config := parseServerCommand()
+		server.New().Start(*config.Host, *config.Port)
 	default:
 		fmt.Printf("%q is not valid command.\n", os.Args[1])
 		os.Exit(2)

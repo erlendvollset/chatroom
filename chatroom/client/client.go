@@ -27,8 +27,8 @@ func generateId(userName string) string {
 	return hex.EncodeToString(id[:])
 }
 
-func New(userName *string) Client {
-	user := &proto.User{Id: generateId(*userName), Name: *userName}
+func New(userName string) Client {
+	user := &proto.User{Id: generateId(userName), Name: userName}
 	wait := &sync.WaitGroup{}
 	return &client{user: user, wait: wait}
 }
