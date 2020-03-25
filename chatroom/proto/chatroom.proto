@@ -13,9 +13,8 @@ message User {
 }
 
 message Message {
-    string id = 1;
+    User user = 1;
     string content = 2;
-    string timestamp = 3;
 }
 
 message Connect {
