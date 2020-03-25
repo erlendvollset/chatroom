@@ -1,10 +1,9 @@
-package main
+package client
 
 import "bufio"
 import "context"
 import "crypto/sha256"
 import "encoding/hex"
-import "flag"
 import "fmt"
 import "github.com/erlendvollset/chatroom/proto"
 import "google.golang.org/grpc"
@@ -46,13 +45,10 @@ func connect(user *proto.User) error {
 	return streamerror
 }
 
-func main() {
+func StartClient(userName *string) {
 	timestamp := time.Now()
 	done := make(chan int)
-	name := flag.String("N", "Anon", "The name of the user")
-	flag.Parse()
-	id := sha256.Sum256([]byte(timestamp.String() + *name))
-
+	id := sha256.Sum256([]byte(timestamp.String() + *userName))
 	conn, err := grpc.Dial("localhost:8080", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Couldn't connect to service: %v", err)
@@ -61,7 +57,7 @@ func main() {
 	client = proto.NewChatroomClient(conn)
 	user := &proto.User{
 		Id: hex.EncodeToString(id[:]),
-		Name: *name,
+		Name: *userName,
 	}
 	connect(user)
 	wait.Add(1)
