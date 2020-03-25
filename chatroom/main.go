@@ -16,6 +16,10 @@ func main() {
 	host := "localhost"
 	port := "8080"
 
+	if len(os.Args) == 1 {
+		fmt.Println("Usage: chatroom {client|server} [args]")
+		os.Exit(0)
+	}
 	switch strings.ToLower(os.Args[1]) {
 	case "client":
 		clientCommand.Parse(os.Args[2:])
